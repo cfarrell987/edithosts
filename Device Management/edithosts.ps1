@@ -9,29 +9,34 @@
 $destIP = "0.0.0.0"
 $hostFilePath = "C:\Windows\System32\drivers\etc\hosts"
 
-
+$totalEntries = 4
 $entries = New-Object System.Collections.Generic.List[string]
 #TODO: Change Entries to be an actual itemized list
 $entries ="0.0.0.0 go.pstmn.io","0.0.0.0 skill-assets.pstmn.io","0.0.0.0 srv.postman.com","0.0.0.0 bifrost-v4.getpostman.com"
 
+
 function editHost($editHostsFile) {
-    $checkHosts = Select-String -Path $hostFilePath -Pattern $entries 
-    Write-Output "Check: " + $checkHosts
-
-    # I Don't like this, Just for testing at the moment. See TODO for Idea of what it will be.
-    if ($checkHosts -like "*go.pstmn.io"){
-        Write-Output "Entries Exists!"
-        break
-    }elseif ($checkHosts -like "*skill-assets.pstmn.io") {
-        
+    foreach ($item in $entries) {
+        #for each item in the list of entries, check for the item in the hosts file, if item does not exist add item, else move to next item until all items have been added.
+        $itemChecker = Select-String -Path $hostFilePath -Pattern $item -Quiet
+    
+        if ($itemChecker -like "True"){
+            Write-Output "Exists!"
+    
+        }elseif ($itemChecker -like "False"){
+            Write-Warning "Does not exist"
+            Write-Output "Appending entry: $item to hosts File"
+            try {
+                Out-File -FilePath $hostFilePath -InputObject $item -Append -Encoding utf8
+            }
+            catch {
+                Write-Error "$computer Get-WMIObject : Access is denied. (Exception from HRESULT: 0x80070005 
+                (E_ACCESSDENIED))"
+                Write-Warning "Please Run as Administrator!"
+            }
+        }
     }
-    else{
-        Write-Output = "Entries Do not Exist Writing now"
-        Out-File -FilePath $hostFilePath -InputObject $entries -Append -Encoding utf8
-        break
-
-    } 
-
+    
 }
 
 editHost
