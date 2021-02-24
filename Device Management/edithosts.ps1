@@ -3,21 +3,20 @@
 # Last Edited: 02/23/21
 # Description: Edits the windows host file to append a decoy address.
 
-#TODO: Add a loop to check for each entry, then if that entry does not exist, add it. This can help improve reliability in the envent that one or more entries, but not all are deleted.
 
-
-$destIP = "0.0.0.0"
+# Define hosts file path, entries list
 $hostFilePath = "C:\Windows\System32\drivers\etc\hosts"
 
-$totalEntries = 4
 $entries = New-Object System.Collections.Generic.List[string]
-#TODO: Change Entries to be an actual itemized list
+
 $entries ="0.0.0.0 go.pstmn.io","0.0.0.0 skill-assets.pstmn.io","0.0.0.0 srv.postman.com","0.0.0.0 bifrost-v4.getpostman.com"
 
-
+# This function checks for each DNS entry in the hosts file, if the entry exists it moves to the next.
+# If the entry does not exist, It will attempt to append it to the hosts file.
+# In the event that the script is not being run as administrator, it will catch the error and output it to the terminal
 function editHost($editHostsFile) {
     foreach ($item in $entries) {
-        #for each item in the list of entries, check for the item in the hosts file, if item does not exist add item, else move to next item until all items have been added.
+        
         $itemChecker = Select-String -Path $hostFilePath -Pattern $item -Quiet
     
         if ($itemChecker -like "True"){
